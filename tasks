@@ -1,0 +1,53 @@
+#!/bin/bash
+
+ set -e
+ set -u
+
+ COMMAND=$1
+ shift || true
+
+ case "$COMMAND" in
+  init)
+    echo "⚙️  Initializing development environment..."
+    # Create venv with uv if it doesn't exist
+    if [ ! -d ".venv" ]; then
+    uv venv
+    fi
+    source .venv/bin/activate
+
+    # Install project dependencies (idempotent)
+    uv pip install -e .
+
+    # Install pre-commit hooks
+    uv run pre-commit install
+
+    ;;
+
+  format)
+    echo "🧼 Formatting code with ruff..."
+    uv run ruff check . --fix
+    ;;
+  
+  lint)
+    echo "🔍 Linting with Ruff..."
+    uv run ruff check .
+    ;;
+
+  typecheck)
+    echo "🔎 Running ty type check..."
+    uvx ty check
+    ;;
+
+  pre-commit)
+    echo "🔧 Running pre-commit hooks on all files..."
+    ./tasks format
+    ./tasks lint
+    ./tasks typecheck
+    ;;
+
+  *)
+    echo "❌ Unknown command: $COMMAND"
+    echo "Usage: ./tasks [init|format|lint|typecheck]"
+    exit 1
+    ;;
+esac
