@@ -1,4 +1,4 @@
-from book import Book
+from library.book.book import Book
 class Topic:
     name: str
     books: tuple[Book, list[str]]
