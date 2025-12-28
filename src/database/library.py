@@ -5,11 +5,16 @@ from src.entities.subject import Subject
 
 
 class Library:
-    def __init__(self, path: str = "data/library.duckdb"):
+    def __init__(self, path: str = "library.duckdb"):
         self.conn = duckdb.connect(path)
 
     # ---------- Books ----------
 
+    def inititalise_schema(self) -> None:
+        with open("src/database/schema.sql", "r") as f:
+            schema_sql = f.read()
+        self.conn.execute(schema_sql)
+    
     def add_book(self, book: Book) -> None:
         row = self.conn.execute(
             "INSERT INTO books (title) VALUES (?) RETURNING id",
