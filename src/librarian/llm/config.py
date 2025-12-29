@@ -1,7 +1,11 @@
-BASE_URL = "http://localhost:11434"
-GENERATE_ENDPOINT = "/api/generate"
+from dotenv import load_dotenv
+import os
 
-MODEL = "llama3.2"
+load_dotenv()
+BASE_URL = os.getenv("BASE_URL")
+GENERATE_ENDPOINT = os.getenv("ENDPOINT")
+
+MODEL = os.getenv("MODEL")
 TIMEOUT = 60  # seconds
 
 # Conservative settings for classification/extraction

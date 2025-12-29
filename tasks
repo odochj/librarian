@@ -45,6 +45,10 @@
     ./tasks typecheck
     ;;
 
+  populate-library)
+    uv run python3 src/scripts/populate_library.py
+    ;;
+
   *)
     echo "❌ Unknown command: $COMMAND"
     echo "Usage: ./tasks [init|format|lint|typecheck]"

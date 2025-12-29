@@ -16,13 +16,24 @@ class Library:
         self.conn.execute(schema_sql)
     
     def add_book(self, book: Book) -> None:
-        row = self.conn.execute(
-            "INSERT INTO book (title, path) VALUES (?, ?) RETURNING id",
-            [book.title, str(book.path)],
-        ).fetchone()
-        if row is None:
-            raise RuntimeError("Failed to insert book; no id returned")
-        book.book_id = row[0]
+        if book in self._check_books():
+            print(f"{book.path} has already been ingested")
+            pass
+        else:
+            row = self.conn.execute(
+                "INSERT INTO book (title, path) VALUES (?, ?) RETURNING id",
+                [book.title, str(book.path)],
+            ).fetchone()
+            if row is None:
+                raise RuntimeError("Failed to insert book; no id returned")
+            book.book_id = row[0]
+
+    def _check_books(self) -> Iterable:
+        return self.conn.execute(
+            """
+            SELECT path FROM book
+            """
+        ).fetchall()
 
     # ---------- TOC ----------
 
