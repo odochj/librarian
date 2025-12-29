@@ -3,9 +3,9 @@ from librarian.sources.text_source import TextSource
 
 
 class Book:
-    def __init__(self, title: str, source: TextSource):
+    def __init__(self, source: TextSource):
         self.book_id: Optional[int] = None
-        self.title = title
+        self.title = source.path.stem.replace("_", " ").title()
         self.source = source
         self.path = source.path
 

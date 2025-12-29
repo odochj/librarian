@@ -1,5 +1,5 @@
 import requests
-from config import (
+from librarian.llm.config import (
     BASE_URL,
     GENERATE_ENDPOINT,
     MODEL,

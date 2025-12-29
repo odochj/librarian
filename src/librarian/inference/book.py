@@ -20,6 +20,7 @@ def extract_toc_entries(text: str) -> Iterable[tuple[str, str]]:
         TOC_EXTRACTION_PROMPT.format(chunk=text)
     )
     for line in csv.splitlines():
+        print(line)
         if not line.strip():
             continue
         h, p = line.split(",", 1)

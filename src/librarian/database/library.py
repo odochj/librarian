@@ -10,7 +10,7 @@ class Library:
 
     # ---------- Books ----------
 
-    def inititalise_schema(self) -> None:
+    def initialise_schema(self) -> None:
         with open("src/librarian/database/schema.sql", "r") as f:
             schema_sql = f.read()
         self.conn.execute(schema_sql)

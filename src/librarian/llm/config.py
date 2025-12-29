@@ -1,7 +1,7 @@
 BASE_URL = "http://localhost:11434"
 GENERATE_ENDPOINT = "/api/generate"
 
-MODEL = "llama3"
+MODEL = "llama3.2"
 TIMEOUT = 60  # seconds
 
 # Conservative settings for classification/extraction
@@ -57,8 +57,10 @@ Instructions:
 - Extract page numbers and chapter or section titles
 - Ignore OCR artifacts
 - Preserve original wording where possible
-- Return a comma separated list in the format:
-  - section_title, page_number
+- Return a comma separated list as per the example below
+section_title, page_number
+title one, 10
+title two, 25
 - Do not add explanations
 
 TEXT:

@@ -1,4 +1,5 @@
 from librarian.database.library import Library
+from librarian.app import Librarian
 from librarian.entities.book import Book
 from librarian.sources.pdf_source import PDFSource
 from pathlib import Path
@@ -9,10 +10,12 @@ load_dotenv()
 books = os.getenv("BOOK_PATH")
 ACCEPTED_FORMATS = {".pdf"}
 
-def populate_library(books):
-    library = Library()
-    library.inititalise_schema()
-    print("Library schema initialised.")
+librarian = Librarian(Library())
+librarian.initialise_library()
+print("Library schema initialised.")
+
+def populate_library(book):
+
     if books is None:
         print("No BOOK_PATH environment variable set. Exiting.")
         return
@@ -30,13 +33,10 @@ def populate_library(books):
                     all_books.append(file)
     
     for book_file in all_books:
-        print(f"Adding book: {book_file.name}")
+        print(f"Processing: {book_file.name}")
         source = PDFSource(book_file)
-        book = Book(
-            title=book_file.name, 
-            source=source
-        )
-        library.add_book(book)
+        book = Book(source=source)
+        librarian.ingest_book(book)
     print("Library population complete.")
 
 

@@ -17,14 +17,20 @@ class Librarian:
     def __init__(self, library: Library):
         self.library = library
 
-    # ---------- Ingestion ----------
+    # ---------- Database ----------
+    def initialise_library(self) -> None:
+        self.library.initialise_schema()
 
+    # ---------- Ingestion ----------
+    
     def ingest_book(self, book: Book) -> None:
+        print(f"Ingesting book: {book.title}")
         self.library.add_book(book)
 
         if book.book_id is None:
             raise RuntimeError("Book persistence failed")
 
+        print("Extracting table of contents...")
         for chunk in book.source.iter_lines():
             if is_table_of_contents(chunk):
                 self.library.add_toc_entries(
@@ -33,6 +39,7 @@ class Librarian:
                 )
                 break
 
+        print("Inferring subjects...")
         self._ingest_subjects(book.book_id)
 
     def _ingest_subjects(self, book_id: int) -> None:

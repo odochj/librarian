@@ -3,14 +3,14 @@ CREATE SEQUENCE IF NOT EXISTS book_id_seq;
 CREATE TABLE IF NOT EXISTS book (
     id INTEGER PRIMARY KEY DEFAULT NEXTVAL('book_id_seq'),
     title TEXT,
-    path TEXT
+    path TEXT UNIQUE
 );
 
 -- table of contents entries
 CREATE SEQUENCE IF NOT EXISTS toc_entry_id_seq;
 CREATE TABLE IF NOT EXISTS toc_entry (
     id INTEGER PRIMARY KEY DEFAULT NEXTVAL('toc_entry_id_seq'),
-    book_id INTEGER,
+    book_id INTEGER REFERENCES book(id),
     heading TEXT,
     page_number TEXT
 );
@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS subject (
 CREATE SEQUENCE IF NOT EXISTS heading_subject_id_seq;
 CREATE TABLE IF NOT EXISTS heading_subject (
     id INTEGER PRIMARY KEY DEFAULT NEXTVAL('heading_subject_id_seq'),
-    toc_entry_id INTEGER,
-    subject_id INTEGER
+    toc_entry_id INTEGER REFERENCES toc_entry(id),
+    subject_id INTEGER REFERENCES subject(id)
 );
 
 -- cache for user intent → subjects
