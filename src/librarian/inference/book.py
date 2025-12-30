@@ -12,6 +12,7 @@ def is_table_of_contents(text: str) -> bool:
     response = _agent.call(
         TOC_DETECTION_PROMPT.format(chunk=text)
     )
+    print(response.strip().upper())
     return response.strip().upper() == "YES"
 
 
@@ -19,9 +20,15 @@ def extract_toc_entries(text: str) -> Iterable[tuple[str, str]]:
     csv = _agent.call(
         TOC_EXTRACTION_PROMPT.format(chunk=text)
     )
+    print(csv)
     for line in csv.splitlines():
-        print(line)
         if not line.strip():
             continue
+        if line.split(",", 1).__len__() != 2:
+            print(f"Skipping malformed TOC line: {line}")
+            continue
         h, p = line.split(",", 1)
-        yield h.strip(), p.strip()
+        if not p.strip().isdigit():
+            print(f"Skipping TOC line with non-integer page number: {line}")
+            continue
+        yield h.strip(), int(p.strip())

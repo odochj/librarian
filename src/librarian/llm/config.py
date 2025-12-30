@@ -61,11 +61,11 @@ Instructions:
 - Extract page numbers and chapter or section titles
 - Ignore OCR artifacts
 - Preserve original wording where possible
-- Return a comma separated list as per the example below
+- Reply ONLY with a comma separated list as per the example below:
 section_title, page_number
 title one, 10
 title two, 25
-- Do not add explanations
+
 
 TEXT:
 {chunk}
@@ -81,7 +81,7 @@ Intsructions:
   - An existing list of canonical subjects
 - Analyze the heading to infer relevant subjects
 - Reuse subjects from the canonical list where possible
-- Return a comma separated list of subjects
+- Return a comma separated list of subjects ONLY
 - Do not add explanations
 
 TABLE:

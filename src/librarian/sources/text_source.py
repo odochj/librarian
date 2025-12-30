@@ -9,3 +9,8 @@ class TextSource(ABC):
     @abstractmethod
     def iter_lines(self) -> Iterator[str]:
         """Yield text line-by-line, lazily."""
+        pass
+    @abstractmethod
+    def iter_pages(self) -> Iterator[str]:
+        """Yield text page-by-page, lazily."""
+        pass

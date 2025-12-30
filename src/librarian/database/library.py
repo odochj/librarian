@@ -16,38 +16,91 @@ class Library:
         self.conn.execute(schema_sql)
     
     def add_book(self, book: Book) -> None:
-        if book in self._check_books():
-            print(f"{book.path} has already been ingested")
-            pass
-        else:
-            row = self.conn.execute(
-                "INSERT INTO book (title, path) VALUES (?, ?) RETURNING id",
-                [book.title, str(book.path)],
-            ).fetchone()
-            if row is None:
-                raise RuntimeError("Failed to insert book; no id returned")
-            book.book_id = row[0]
+        # Try to find the book
+        row = self.conn.execute(
+            """
+            SELECT id
+            FROM book
+            WHERE path = ?
+            """,
+            [str(book.path)],
+        ).fetchone()
 
-    def _check_books(self) -> Iterable:
-        return self.conn.execute(
+        # If it already exists, we’re done
+        if row:
+            book.book_id = row[0]
+            return
+
+        # Otherwise, insert it
+        row = self.conn.execute(
             """
-            SELECT path FROM book
+            INSERT INTO book (title, path)
+            VALUES (?, ?)
+            RETURNING id
+            """,
+            [book.title, str(book.path)],
+        ).fetchone()
+
+        if row is None:
+            raise RuntimeError("Failed to insert book")
+
+        book.book_id = row[0]
+
+    def get_book_state(self, book_id: int) -> dict:
+        row = self.conn.execute(
             """
-        ).fetchall()
+            SELECT toc_ingested, subjects_ingested
+            FROM book
+            WHERE id = ?
+            """,
+            [book_id],
+        ).fetchone()
+
+        if row is None:
+            # Book not found
+            return {
+                "toc_ingested": False,
+                "subjects_ingested": False
+            }
+
+        return {
+            "toc_ingested": bool(row[0]),
+            "subjects_ingested": bool(row[1]),
+        }
+    
+    def mark_toc_ingested(self, book_id: int) -> None:
+        self.conn.execute(
+            "UPDATE book SET toc_ingested = TRUE WHERE id = ?",
+            [book_id],
+        )
+
+    def mark_subjects_ingested(self, book_id: int) -> None:
+        self.conn.execute(
+            "UPDATE book SET subjects_ingested = TRUE WHERE id = ?",
+            [book_id],
+        )
+
+
 
     # ---------- TOC ----------
 
     def add_toc_entries(
         self,
-        book_id: int,
+        book_id: int | None,
         entries: Iterable[tuple[str, str]],
     ) -> None:
+        entries_list = list(entries)
+        if not entries_list:
+            print(" WARNING: No TOC entries to add")
+            return
+
+        params = [(book_id, h, p) for h, p in entries_list]
         self.conn.executemany(
             """
             INSERT INTO toc_entry (book_id, heading, page_number)
             VALUES (?, ?, ?)
             """,
-            ((book_id, h, p) for h, p in entries),
+            params,
         )
 
     def get_toc_entries(
@@ -96,6 +149,20 @@ class Library:
             """,
             [toc_entry_id, subject_id],
         )
+    def verify_subject_extraction_by_book(
+        self,
+        book : Book,
+    ) -> bool:
+        row = self.conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM heading_subject hs
+            JOIN toc_entry te ON hs.toc_entry_id = te.id
+            WHERE te.book_id = ?
+            """,
+            [book.book_id],
+        ).fetchone()
+        return row[0] > 0 if row else False 
 
     def list_subjects(self) -> Sequence[Subject]:
         return [

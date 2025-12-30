@@ -2,8 +2,10 @@
 CREATE SEQUENCE IF NOT EXISTS book_id_seq;
 CREATE TABLE IF NOT EXISTS book (
     id INTEGER PRIMARY KEY DEFAULT NEXTVAL('book_id_seq'),
-    title TEXT,
-    path TEXT UNIQUE
+    title TEXT NOT NULL,
+    path TEXT NOT NULL UNIQUE,
+    toc_ingested BOOLEAN DEFAULT FALSE,
+    subjects_ingested BOOLEAN DEFAULT FALSE
 );
 
 -- table of contents entries
@@ -12,7 +14,7 @@ CREATE TABLE IF NOT EXISTS toc_entry (
     id INTEGER PRIMARY KEY DEFAULT NEXTVAL('toc_entry_id_seq'),
     book_id INTEGER REFERENCES book(id),
     heading TEXT,
-    page_number TEXT
+    page_number INTEGER
 );
 
 -- canonical subjects

@@ -26,11 +26,13 @@ def populate_library(book):
         return
 
     all_books = []
-    for subfolder in book_path.iterdir():
-        if subfolder.is_dir():
-            for file in subfolder.iterdir():
-                if file.suffix.lower() in ACCEPTED_FORMATS:
-                    all_books.append(file)
+    if book_path.is_file():
+        if book_path.suffix.lower() in ACCEPTED_FORMATS:
+            all_books.append(book_path)
+    else:
+        for file in book_path.rglob('*'):
+            if file.is_file() and file.suffix.lower() in ACCEPTED_FORMATS:
+                all_books.append(file)
     
     for book_file in all_books:
         print(f"Processing: {book_file.name}")

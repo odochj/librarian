@@ -12,4 +12,5 @@ def infer_subjects(heading: str) -> Sequence[str]:
             subjects=", ".join(SUBJECTS),
         )
     )
+    print(response)
     return [s.strip() for s in response.split(",") if s.strip()]

@@ -24,32 +24,57 @@ class Librarian:
     # ---------- Ingestion ----------
     
     def ingest_book(self, book: Book) -> None:
-        print(f"Ingesting book: {book.title}")
+        print(f"Extracted title: {book.title}")
         self.library.add_book(book)
 
         if book.book_id is None:
             raise RuntimeError("Book persistence failed")
 
-        print("Extracting table of contents...")
-        for chunk in book.source.iter_lines():
+        print(f"Checking ingestion state for book ID {book.book_id}...")
+        state = self.library.get_book_state(book.book_id)
+
+        if not state["toc_ingested"]:
+            self._ingest_toc(book)
+            if self.library.get_toc_entries(book.book_id):  # verify entries added
+                self.library.mark_toc_ingested(book.book_id)
+                print("TOC entries ingested.")
+            else:
+                print("Warning: No TOC entries found during ingestion.")   
+
+        if not state["subjects_ingested"]:
+            self._ingest_subjects(book.book_id)
+            if self.library.verify_subject_extraction_by_book(book):
+                self.library.mark_subjects_ingested(book.book_id)
+                print("Subjects ingested.")
+            else:
+                print("Warning: No subjects found during ingestion.")
+
+    def _ingest_toc(self, book: Book) -> None:
+        in_toc = False
+
+        for chunk in book.source.iter_pages():
             if is_table_of_contents(chunk):
+                in_toc = True
                 self.library.add_toc_entries(
                     book.book_id,
                     extract_toc_entries(chunk),
                 )
-                break
+            else:
+                if in_toc:
+                    # We were in TOC, and now we are not → TOC ended
+                    break
 
-        print("Inferring subjects...")
-        self._ingest_subjects(book.book_id)
-
+    
     def _ingest_subjects(self, book_id: int) -> None:
         for toc_id, heading, _ in self.library.get_toc_entries(book_id):
             for name in infer_subjects(heading):
                 subject = self.library.get_or_create_subject(name)
-                self.library.link_heading_to_subject(
-                    toc_id,
-                    subject.subject_id,
-                )
+                if subject:
+                    self.library.link_heading_to_subject(
+                        toc_id,
+                        subject.subject_id,
+                    )
+                    return
 
     # ---------- User-facing ----------
 

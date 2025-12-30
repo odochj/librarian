@@ -11,7 +11,7 @@ URL = f"{BASE_URL}{GENERATE_ENDPOINT}"
 
 
 class Agent:
-    def __init__(self, model: str = MODEL, url: str = URL):
+    def __init__(self, model: str | None = MODEL, url: str = URL):
         self.model = model
         self.url = url
 
