@@ -11,7 +11,7 @@ Solution:
 2. Communicate my learning goals to the same LLM, and map those goals to the subjects I've catalogued
 3. Return a reading list with the exact pages needed from each book I own (whilst also highlighting any subjects that are not covered)
 
-```mermaid
+```
 src/
 └── librarian/
     ├── database/
