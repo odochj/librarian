@@ -49,6 +49,10 @@
     uv run python3 src/scripts/populate_library.py
     ;;
 
+  create-curriculum)
+    uv run python3 src/scripts/create_curriculum.py
+    ;;
+
   *)
     echo "❌ Unknown command: $COMMAND"
     echo "Usage: ./tasks [init|format|lint|typecheck]"

@@ -166,3 +166,5 @@ cython_debug/
 library.duckdb
 
 *.DS_Store
+
+output/*

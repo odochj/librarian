@@ -16,4 +16,5 @@ def infer_user_subjects(
             subjects=", ".join(available_subjects),
         )
     )
+    print(response)
     return json.loads(response)

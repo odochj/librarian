@@ -5,6 +5,7 @@ from librarian.llm.config import (
     MODEL,
     TEMPERATURE,
     TOP_P,
+    TIMEOUT
 )
 
 URL = f"{BASE_URL}{GENERATE_ENDPOINT}"
@@ -28,7 +29,7 @@ class Agent:
     #     raise AttributeError("model not set")
 
     # if URL:
-        response = requests.post(self.url, json=payload, timeout=60)
+        response = requests.post(self.url, json=payload, timeout=TIMEOUT)
         response.raise_for_status()
     # else:
     #     raise AttributeError("URL not set")

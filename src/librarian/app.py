@@ -8,13 +8,14 @@ from librarian.inference.book import (
 )
 from librarian.inference.subject import infer_subjects
 from librarian.inference.user import infer_user_subjects
-
+from librarian.inference.curriculum import consolidate_recommendations
+from datetime import datetime
 
 WORDS_PER_PAGE = 400  # conservative technical average
 
 
 class Librarian:
-    def __init__(self, library: Library):
+    def __init__(self, library: Library = Library()):
         self.library = library
 
     # ---------- Database ----------
@@ -78,17 +79,39 @@ class Librarian:
 
     # ---------- User-facing ----------
 
-    def recommend_curriculum(self, query: str) -> str:
+    def recommend_curriculum(self, query: str) -> None:
+        print("Compiling list of available subjects...")
         subjects = self.library.list_subjects()
         subject_names = [s.name for s in subjects]
 
+        print("Interpreting user query...")
         interpretation = infer_user_subjects(query, subject_names)
-        matched = interpretation.get("matched", [])
-        missing = interpretation.get("missing", [])
+        print("Mapping query to subjects complete.")
+        matched = interpretation.get("matched_subjects", [])
+        missing = interpretation.get("missing_subjects", [])
 
-        return self._render_plan(matched, missing)
+        plan =  self._render_plan(matched, missing)  
+        return self._consolidate_plan(query, plan, subjects=str(matched[1]))
 
     # ---------- Helpers ----------
+
+    def _consolidate_plan(
+            self,
+            query: str,
+            plan: str,
+            subjects: Sequence[str]
+    ) -> None:
+        print("Consolidating recommendations...")
+        agent_response = consolidate_recommendations(
+            query,
+            plan,
+            subjects,
+        )
+
+        open("output/final/curriculum_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".md", "w").write(agent_response)
+
+        return print("Reading list can be found in output/ directory.")
+        
 
     def _render_plan(
         self,
@@ -97,6 +120,8 @@ class Librarian:
     ) -> str:
         lines: list[str] = ["# Targeted Reading Plan\n"]
 
+        print("Compiling reading plan...")
+        print(f" Finding books for Matched subjects: {matched_subjects}")
         for subject_name in matched_subjects:
             subject = self.library.get_subject_by_name(subject_name)
             if not subject:
@@ -116,7 +141,7 @@ class Librarian:
                 sections.sort(key=lambda x: x[1])
                 ranges = self._merge_pages(sections)
 
-                lines.append(f"**{book}**")
+                lines.append(f"###{book}")
                 for start, end, headings in ranges:
                     minutes = self._estimate_time(start, end)
                     label = f"p. {start}" if start == end else f"pp. {start}–{end}"
@@ -129,9 +154,11 @@ class Librarian:
             lines.append("\n# Topics Not Covered\n")
             for name in missing_subjects:
                 lines.append(f"- {name}")
-
-        return "\n".join(lines)
-
+        plan = "\n".join(lines)
+        open("output/raw/curriculum_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".md", "w").write(plan)
+        print("Raw reading plan saved to output/ directory.")
+        return plan
+    
     def _merge_pages(
         self,
         sections: list[tuple[str, int]],

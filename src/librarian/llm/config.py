@@ -6,7 +6,7 @@ BASE_URL = os.getenv("BASE_URL")
 GENERATE_ENDPOINT = os.getenv("ENDPOINT")
 
 MODEL = os.getenv("MODEL")
-TIMEOUT = 60  # seconds
+TIMEOUT = 600  # seconds
 
 # Conservative settings for classification/extraction
 TEMPERATURE = 0.0
@@ -99,10 +99,25 @@ USER GOAL:
 AVAILABLE SUBJECTS:
 {subjects}
 
-Return STRICT JSON:
+Return STRICT JSON ONLY - no other text:
 
-{
+{{
   "matched_subjects": [string],
   "missing_subjects": [string]
-}
+}}
+"""
+
+CONSOLIDATE_RECOMMENDATIONS_PROMPT = """
+This reading list is comprised of the tables of contents from multiple technical books.
+Each heading 2 (##) corresponds to a subject area.
+Each heading 3 (###) corresponds to a book title, followed by recommended pages to read.
+Your task is to consolidate this into a cohesive reading plan for a user.
+Instructions:
+- Organize the reading list by book title only
+- For each book, list the subjects and corresponding page ranges to read
+- Eliminate any duplicate or overlapping page ranges
+
+READING LIST:
+{plan}
+
 """
